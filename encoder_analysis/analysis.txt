@@ -1,0 +1,72 @@
+These two plots are measuring different things, so they can absolutely disagree.
+
+What the coverage plot says:
+
+On average, intervals of the form mu_hat ± k * std contain the true theta about as often as they should.
+That is a calibration statement.
+It is an aggregate property over many samples.
+What the middle plot says:
+
+For an individual sample, a larger predicted std does not tell you very precisely what that sample’s actual error will be.
+That is a discrimination/sharpness statement.
+It asks whether std is a strong per-sample predictor of difficulty.
+Those are not the same.
+
+A very important subtlety:
+
+The dashed line in the middle is an expected relationship:
+E[|error| | std] = sqrt(2/pi) * std
+It is not saying each point should lie on the line.
+Even with a perfectly calibrated Gaussian model, individual points would still have a lot of vertical spread, because each point is one random draw of |error|.
+So:
+
+good coverage + noisy middle scatter is not paradoxical
+it means the model may be calibrated in aggregate, but not very sharp
+A simple analogy:
+
+If the model predicted almost the same std for every sample, and that one std happened to match the overall error scale, coverage could look great.
+But that same model would be poor at telling easy cases from hard cases.
+That would make the middle plot look weak.
+That is basically what your figure suggests:
+
+calibration: pretty good
+per-sample informativeness of std: limited
+So the right interpretation is:
+
+the uncertainty is not nonsense
+but it may be mostly getting the global scale right, rather than strongly resolving sample-by-sample difficulty
+If you want a cleaner diagnostic, the better thing is not the raw scatter alone, but:
+
+bin by predicted std
+compute mean |mu_hat - theta| in each bin
+compare that binned mean to sqrt(2/pi) * std
+That tells you whether the expected relation holds conditionally, without being dominated by single-sample noise.
+
+----------------------------------------------------------------
+
+Okay, let's take a step back. We did these experiments to verify whether the encoder structure is able to learn the uncertainty.
+The first setup we tried was some function (e.g. linear) where we manually added heteroscedastic noise based on the input to the function, i.e.
+y = f(x) + \epsilon(x).
+Both setups where able to learn both mean prediction and aleatoric uncertainty (which we explicitely defined) very well. However, in this setting, there is no time series to infer from. There is only that singular time invariant input without dynamics from which the mean and variance need to be predicted. Note, that in this setting we have a deterministic (unique) input, that my lead to multiple outputs (do to noise).
+
+The second setup therefore, was a simple dynamic system with the dynamics
+x_{t+1} = theta * x_t + u_t + \epsilon
+We first sample a random input sequence u_{0:window_length} nad given that input sequence, simulate that system, keep that on trajectory and use that as input to the encoder. The desired output is the parameter theta, however the targets were made noise, i.e.
+y = theta + \epsilon.
+We also sampled the datapoints to either have high or low variance for \epsilon. In this setting, the model was generally able to predict higher std for the high variance and lower of the low variance cases. However, the spread of the predicted std was very large, even though by design we had two sharp discrete std values in simulation.
+
+Note, that the additional noise on the regression targets (y = theta + \epsilon) is actually not analogous to our setup. While we have process noise, the process noise is not on the targets themselves but on the trajectory construction. Once I removed that second uncertainty and only kept the uncertainty in the process noise, there was no positive trend between high and low variance cases. Both had the same spread with same range of values. In other words, the model cannot discriminate between difficult or easier settings i.e. settings with higher and lower process noise.
+
+Then, we further simplified the system because generating a completely random input sequence (even though provided to in the trajectory) is actually an additional DoF compared to our setup, where the actions are choosen from a fixed policy given the current state (and depending on theta). This we defined:
+u_t = 0.8 * tanh(0.4 + 0.5 * theta - 0.7 * x)
+and ran the test again. The result:
+- very good mean predictions of theta as always
+- very good coverage, i.e. in a certain std range around the mean there actually lie as many predictions as one would expect. That means the global scale of uncertainty estimates is quite good.
+- the error over predicted std plot shows barely any correlation. That means that while the global scale of the uncertainty predictions is good, the per-simple discrimination of whether this is difficult to predict or not is not informative.
+
+
+
+----------------------------------------------------------------
+
+However, when binned, the error over predicted std plot is not too bad anymore. It seems like it can predict general trends but not the individual uncertainty well.
+That might not be an issue since not every single timestep needs to have exact uncertainty. It only needs a general trend on whether to explore or exploit.

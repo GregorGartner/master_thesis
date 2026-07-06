@@ -1,0 +1,167 @@
+callbacks:
+- enabled: true
+  name: LivePlotCallback
+  params:
+    update_every_episodes: 200
+- enabled: false
+  name: PrintProgressCallback
+  params:
+    print_every: 500
+- enabled: true
+  name: SaveModelCallback
+  params:
+    best_metric: episode_reward
+    save_best_name: weights_best
+    save_every_episodes: 1000
+    save_name: weights
+    save_on_training_end: true
+environment: stopping_car
+lqr_env:
+  A:
+  - - 0.98
+    - 0.0
+  - - 0.0
+    - 0.95
+  B:
+  - - 0.1
+    - 0.03
+  - - 1.0
+    - 0.2
+  Q:
+  - - 2.0
+    - 0.0
+  - - 0.0
+    - 1.0
+  R:
+  - - 5.0
+    - 0.0
+  - - 0.0
+    - 1.5
+  delta_B:
+  - - 0.5
+    - 0.02
+  - - 0.15
+    - 1.0
+  initial_state_high: 0.3
+  initial_state_low: -0.3
+  max_episode_steps: 512
+  process_noise_std: 0.05
+model:
+  name: UnifiedContextPPO
+  params:
+    actor_net_arch:
+    - 64
+    - 64
+    batch_size: 576
+    clip_range: 0.2
+    condition_on_uncertainty: false
+    context_mode: privileged
+    critic_net_arch:
+    - 64
+    - 64
+    detach_context_for_rl: true
+    deterministic_actions: false
+    device: cpu
+    encoder_net_arch:
+    - 64
+    - 64
+    encoder_type: mlp
+    ent_coef: 0.0005
+    freeze_ppo: false
+    gae_lambda: 0.95
+    gamma: 0.995
+    id_update_interval: 1
+    latent_dim: 1
+    learning_rate: 0.0001
+    max_grad_norm: 1.0
+    n_epochs: 8
+    n_steps: 384
+    naive_action_noise_dist: gaussian
+    naive_action_noise_std: 0.0
+    nominal_warmup_steps: 0
+    normalize_advantage: true
+    policy: MlpPolicy
+    policy_loss_coef: 1.0
+    privileged_context_probability: 0.0
+    privileged_uncertainty_mode: zeros
+    privileged_uncertainty_value: 0.0
+    regression_coef: 0.0
+    regression_param_names:
+    - mu
+    seed: 2
+    target_kl: null
+    transition_type: delta
+    uncertainty_penalty_metric: std
+    uncertainty_regularization_coef: 0.0
+    uncertainty_reward_penalty_coef: 0.0
+    use_transition_features: true
+    verbose: 1
+    vf_coef: 0.5
+    window_length: 30
+    z_scale: 1.0
+    initial_context: null
+    action_log_std_init: -1.2
+total_timesteps: 4000000
+training:
+  experiment_name: privileged_v10
+  experiment_name_suffix: null
+  experiment_root: /Users/gregorgartner/Library/CloudStorage/OneDrive-Personal/Dokumente/ETHZ/Semester_5/Master
+    thesis/code/experiments/friction_stopping/friction_stopping_v10_07-06__11-02
+  load_encoder_only: false
+  load_weights: true
+  load_weights_from: /Users/gregorgartner/Library/CloudStorage/OneDrive-Personal/Dokumente/ETHZ/Semester_5/Master
+    thesis/code/experiments/friction_stopping/friction_stopping_v10_07-06__11-02/privileged_v10
+  load_weights_name: weights
+  num_envs: 6
+  vec_env_type: dummy
+wrappers:
+- name: DomainRandomizationWrapper
+  enabled: true
+  params:
+    change_prob: 1.0
+    only_at_episode_end: true
+    randomize_on_reset: true
+    randomize_theta: false
+    randomize_mu: true
+    mu_range:
+    - 0.25
+    - 0.5
+    - 0.75
+    randomize_process_noise_scale: false
+    process_noise_scale_mult_range:
+    - 1.0
+    categorical: true
+stopping_car_env:
+  dt: 0.05
+  mu: 0.5
+  process_noise_std: 0.0
+  initial_velocity_low: 2.0
+  initial_velocity_high: 3.0
+  action_low: -1.0
+  action_high: 1.0
+  max_episode_steps: 300
+  v_ref: 2.5
+  sigma_v: 0.5
+  d_max: 5.0
+  event_time_mode: uniform_once
+  event_time_low: 80
+  event_time_high: 260
+  visible_distance_low: 0.9
+  visible_distance_high: 1.2
+  start_visible: false
+  g: 9.81
+  brake_accel_max: 8.0
+  throttle_accel_max: 8.0
+  saturate_throttle_by_friction: false
+  speed_reward_weight: 1.0
+  action_cost_weight: 0.15
+  safety_cost_weight: 12.0
+  safety_alpha: 5.0
+  d_buffer: 0.15
+  v_safe: 0.1
+  crash_penalty: 250.0
+  crash_remaining_penalty: 250.0
+  success_bonus: 5.0
+  terminate_on_success: true
+  terminate_on_crash: true
+max_episode_steps: 300

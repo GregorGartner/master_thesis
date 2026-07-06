@@ -1,0 +1,99 @@
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.coverage
+htmlcov/
+
+# Virtual environments and local environment files
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+!.env.example
+
+# Package/build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# IDE/editor and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local scratch files
+nohup.out
+*.tmp
+*.bak
+
+# Runtime logs
+*.log
+*.l
+logs/
+
+# ML/reinforcement-learning run outputs
+experiments/
+runs/
+outputs/
+artifacts/
+checkpoints/
+tensorboard/
+wandb/
+mlruns/
+
+# Common generated training/evaluation files
+monitor*.csv
+*.monitor.csv
+progress.csv
+episode_returns_live.csv
+regression_live.csv
+eval_episodes.csv
+step_predictions.csv
+trajectory_trace.csv
+rollouts.csv
+
+# Model checkpoints and serialized artifacts
+*.zip
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.pkl
+*.pickle
+*.joblib
+*.metric
+
+# Large/generated numeric data
+*.npy
+*.npz
+*.h5
+*.hdf5
+*.parquet
+*.feather
+
+# Generated plots/reports from experiments
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.pdf
+*.html
+
+# If you intentionally want lightweight curated results in Git, put them
+# in results/ or docs/ and force-add ignored files with: git add -f <path>
