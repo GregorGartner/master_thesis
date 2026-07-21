@@ -15,7 +15,7 @@ callbacks:
     save_every_episodes: 1000
     save_name: weights
     save_on_training_end: true
-environment: stopping_car
+environment: lqr
 lqr_env:
   A:
   - - 0.98
@@ -50,45 +50,45 @@ model:
   name: UnifiedContextPPO
   params:
     actor_net_arch:
-    - 64
-    - 64
-    batch_size: 576
+    - 128
+    - 128
+    batch_size: 1024
     clip_range: 0.2
-    condition_on_uncertainty: false
-    context_mode: privileged
+    condition_on_uncertainty: true
+    context_mode: encoder_nll
     critic_net_arch:
-    - 64
-    - 64
+    - 128
+    - 128
     detach_context_for_rl: true
     deterministic_actions: false
     device: cpu
     encoder_net_arch:
-    - 64
-    - 64
+    - 128
+    - 128
     encoder_type: mlp
-    ent_coef: 0.0005
+    ent_coef: 0.002
     freeze_ppo: false
     gae_lambda: 0.95
     gamma: 0.995
-    id_update_interval: 1
+    id_update_interval: 10
     latent_dim: 1
-    learning_rate: 0.0001
+    learning_rate: 5.0e-05
     max_grad_norm: 1.0
     n_epochs: 8
-    n_steps: 384
+    n_steps: 512
     naive_action_noise_dist: gaussian
     naive_action_noise_std: 0.0
-    nominal_warmup_steps: 0
+    nominal_warmup_steps: 49
     normalize_advantage: true
     policy: MlpPolicy
     policy_loss_coef: 1.0
     privileged_context_probability: 0.0
-    privileged_uncertainty_mode: zeros
+    privileged_uncertainty_mode: predicted
     privileged_uncertainty_value: 0.0
-    regression_coef: 0.0
+    regression_coef: 1.0
     regression_param_names:
-    - mu
-    seed: 2
+    - theta
+    seed: 3
     target_kl: null
     transition_type: delta
     uncertainty_penalty_metric: std
@@ -97,22 +97,20 @@ model:
     use_transition_features: true
     verbose: 1
     vf_coef: 0.5
-    window_length: 30
-    z_scale: 1.0
-    initial_context: null
-    action_log_std_init: -1.2
-total_timesteps: 4000000
+    window_length: 50
+    z_scale: 10.0
+total_timesteps: 2000000
 training:
-  experiment_name: privileged_v10
+  experiment_name: categorical_gradual_nll_mean_std_seed3
   experiment_name_suffix: null
   experiment_root: /Users/gregorgartner/Library/CloudStorage/OneDrive-Personal/Dokumente/ETHZ/Semester_5/Master
-    thesis/code/experiments/friction_stopping/friction_stopping_v10_07-06__11-02
+    thesis/code/experiments/r22_final_thesis/final_thesis_07-20__23-46-29_r22_1p5/training
   load_encoder_only: false
   load_weights: true
   load_weights_from: /Users/gregorgartner/Library/CloudStorage/OneDrive-Personal/Dokumente/ETHZ/Semester_5/Master
-    thesis/code/experiments/friction_stopping/friction_stopping_v10_07-06__11-02/privileged_v10
+    thesis/code/experiments/r22_final_thesis/final_thesis_07-20__23-46-29_r22_1p5/training/categorical_gradual_nll_mean_std_seed3
   load_weights_name: weights
-  num_envs: 6
+  num_envs: 8
   vec_env_type: dummy
 wrappers:
 - name: DomainRandomizationWrapper
@@ -121,16 +119,28 @@ wrappers:
     change_prob: 1.0
     only_at_episode_end: true
     randomize_on_reset: true
-    randomize_theta: false
-    randomize_mu: true
+    randomize_theta: true
+    theta_mult_range:
+    - -0.25
+    - 0.0
+    - 0.25
     mu_range:
     - 0.25
-    - 0.5
     - 0.75
-    randomize_process_noise_scale: false
+    a_range:
+    - 0.75
+    - 1.05
+    b_range:
+    - 0.4
+    - 1.8
     process_noise_scale_mult_range:
     - 1.0
+    - 1.0
     categorical: true
+    randomize_mu: false
+    randomize_a: false
+    randomize_b: false
+    randomize_process_noise_scale: false
 stopping_car_env:
   dt: 0.05
   mu: 0.5

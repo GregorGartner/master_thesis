@@ -44,7 +44,7 @@ N_THETA_POINTS = int(os.environ.get("THETA_SWEEP_N_THETA_POINTS", "41"))
 # Run both a noiseless identification sweep and the nominal-noise sweep.
 PROCESS_NOISE_SCALES = [1.0]
 EPISODES_PER_THETA = int(os.environ.get("THETA_SWEEP_EPISODES_PER_THETA", "20"))
-EVAL_BASE_SEED = 12345
+EVAL_BASE_SEED = int(os.environ.get("THETA_SWEEP_EVAL_BASE_SEED", "12345"))
 CALIBRATION_NUM_BINS = 10
 COVERAGE_KS = tuple(np.arange(0.1, 2.1, 0.1))
 
@@ -1598,6 +1598,18 @@ def _build_controller_scorecard(
             for row in center_rows
             if row.get(rmse_key) not in {None, ""}
         ]
+        info_key = "episode_info_proxy_mean"
+        info_values = [float(row[info_key]) for row in rows if row.get(info_key) not in {None, ""}]
+        tail_info_values = [
+            float(row[info_key])
+            for row in tail_rows
+            if row.get(info_key) not in {None, ""}
+        ]
+        center_info_values = [
+            float(row[info_key])
+            for row in center_rows
+            if row.get(info_key) not in {None, ""}
+        ]
 
         scorecard.append(
             {
@@ -1618,6 +1630,9 @@ def _build_controller_scorecard(
                 "theta_rmse": _mean_or_none(rmse_values),
                 "tail_theta_rmse": _mean_or_none(tail_rmse_values),
                 "center_theta_rmse": _mean_or_none(center_rmse_values),
+                "mean_info_proxy": _mean_or_none(info_values),
+                "tail_mean_info_proxy": _mean_or_none(tail_info_values),
+                "center_mean_info_proxy": _mean_or_none(center_info_values),
             }
         )
 

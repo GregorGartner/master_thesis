@@ -83,8 +83,10 @@ def _set_discrete_theta_wrappers(cfg: dict) -> None:
         if wrapper.get("name") in {"DomainRandomizationWrapper", "ChangingCartPoleDynamics"}:
             params = wrapper.setdefault("params", {})
             params["randomize_theta"] = True
+            params["randomize_mu"] = False
             params["randomize_a"] = False
             params["randomize_b"] = False
+            params["randomize_process_noise_scale"] = False
             params["theta_mult_range"] = list(DISCRETE_THETA_VALUES)
             params["categorical"] = True
 

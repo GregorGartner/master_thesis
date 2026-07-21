@@ -166,6 +166,12 @@ def _base_cfg(base_cfg: dict, exp_root: Path, exp_name: str, steps: int, system:
     return cfg
 
 
+def _apply_rollout_batch_settings(cfg: dict) -> None:
+    params = cfg["model"]["params"]
+    params["n_steps"] = TRAIN_N_STEPS
+    params["batch_size"] = TRAIN_BATCH_SIZE
+
+
 def _set_load(cfg: dict, source: Path | None, weights_name: str = "weights") -> None:
     cfg["training"]["load_weights"] = source is not None
     cfg["training"]["load_weights_from"] = str(source.resolve()) if source is not None else None
@@ -212,6 +218,7 @@ def _set_gradual(
     params["uncertainty_reward_penalty_coef"] = 0.0
     params["naive_action_noise_std"] = 0.0
     params["naive_action_noise_dist"] = "gaussian"
+    _apply_rollout_batch_settings(cfg)
 
 
 def _set_calibration_refresh(
@@ -238,6 +245,7 @@ def _set_calibration_refresh(
     params["uncertainty_reward_penalty_coef"] = 0.0
     params["naive_action_noise_std"] = list(CALIBRATION_NOISE_STD)
     params["naive_action_noise_dist"] = list(CALIBRATION_NOISE_DIST)
+    _apply_rollout_batch_settings(cfg)
 
 
 def _set_policy_finetune(
@@ -266,6 +274,7 @@ def _set_policy_finetune(
     params["uncertainty_reward_penalty_coef"] = 0.0
     params["naive_action_noise_std"] = 0.0
     params["naive_action_noise_dist"] = "gaussian"
+    _apply_rollout_batch_settings(cfg)
 
 
 def _train_method(

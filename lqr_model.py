@@ -551,7 +551,11 @@ class StoppingCarEnv(gym.Env):
 
     def _safety_cost(self, velocity: float, distance: float) -> float:
         margin = self.stopping_distance(velocity=velocity) + self.d_buffer - float(distance)
-        softplus = math.log1p(math.exp(self.safety_alpha * margin)) / self.safety_alpha
+        scaled_margin = self.safety_alpha * margin
+        if scaled_margin > 0.0:
+            softplus = (scaled_margin + math.log1p(math.exp(-scaled_margin))) / self.safety_alpha
+        else:
+            softplus = math.log1p(math.exp(scaled_margin)) / self.safety_alpha
         return float(self.safety_cost_weight * softplus)
 
     def step(self, action: np.ndarray):
